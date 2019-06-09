@@ -3,7 +3,9 @@
 #include <vector>
 #include <memory>
 
+extern "C" {
 #include <dc.h>
+}
 
 class MTRandom
 {
@@ -19,4 +21,4 @@ public:
 
 std::vector<std::unique_ptr<MTRandom>> MT2203Factory(size_t num_engines,
                                                      size_t group_seed,
-                                                     std::vector<size_t> seeds);
+                                                     std::vector<size_t> seeds = {});

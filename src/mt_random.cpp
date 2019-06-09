@@ -31,7 +31,7 @@ MTRandom::~MTRandom()
 
 std::vector<std::unique_ptr<MTRandom>> MT2203Factory(size_t num_engines,
                                                      size_t group_seed,
-                                                     std::vector<size_t> seeds = {})
+                                                     std::vector<size_t> seeds)
 {
   std::vector<std::unique_ptr<MTRandom>> generators;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <cmath>
 #include <omp.h>
 
 #include "mt_random.hpp"
@@ -13,6 +14,7 @@ std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n
   auto random_engines = MT2203Factory(n_threads, seed);
   std::vector<std::vector<double>> solutions;
   solutions.resize(n_impls);
+  auto solver_rule = T(d, step);
 
 #pragma omp parallel for num_threads(n_threads) schedule(static)
   for (size_t i = 0; i < n_impls; i++)
@@ -22,7 +24,7 @@ std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n
     solutions[i].reserve(n_steps);
     for (size_t j = 0; j < n_steps; j++)
     {
-      x = T()(f, d, step, x, random_engines[thread_idx]->gen_normal());
+      x = solver_rule(f, x, random_engines[thread_idx]->gen_normal());
       solutions[i].push_back(x);
     }
   }
@@ -30,15 +32,25 @@ std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n
   return solutions;
 }
 
-
-class EulerScheme
+class Scheme
 {
+protected:
+  double noise_koeff;
+  double h;
 public:
-  double operator()(std::function<double(double)> f, double d, double h, double x, double y);
+  Scheme(double d_, double h_) : noise_koeff(sqrt(2*d_*h_)), h(h_) {}
 };
 
-class HeunScheme
+class EulerScheme : public Scheme
 {
 public:
-  double operator()(std::function<double(double)> f, double d, double h, double x, double y);
+  EulerScheme(double d, double h) : Scheme(d, h) {}
+  double operator()(std::function<double(double)> f, double x, double y);
+};
+
+class HeunScheme : public Scheme
+{
+public:
+  HeunScheme(double d, double h) : Scheme(d, h) {}
+  double operator()(std::function<double(double)> f, double x, double y);
 };

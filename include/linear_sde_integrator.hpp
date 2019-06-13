@@ -6,25 +6,28 @@
 #include "mt_random.hpp"
 
 template <typename T>
-double integrate_linear_sde(size_t n_threads, size_t n_impls,
-                            double step, double max_time, double d,
-                            std::function<double(double)> f, double x0)
+std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n_impls,
+                            double step, size_t n_steps, double x0, double d,
+                            std::function<double(double)> f)
 {
   auto random_engines = MT2203Factory(n_threads, 123);
-  size_t n_steps = static_cast<size_t>(max_time / step);
-  std::vector<double> solutions;
-  solutions.reserve(n_steps);
+  std::vector<std::vector<double>> solutions;
+  solutions.resize(n_impls);
 
-#pragma omp parallel for num_threads(n_threads)
+#pragma omp parallel for num_threads(n_threads) schedule(static)
   for (size_t i = 0; i < n_impls; i++)
   {
     int thread_idx = omp_get_thread_num();
     double x = x0;
-    for (size_t j = 0; j < n_steps; i++)
-      x = T(f, d, step, x, random_engines[thread_idx]->gen_normal());
+    solutions[i].resize(n_steps);
+    for (size_t j = 0; j < n_steps; j++)
+    {
+      x = T()(f, d, step, x, random_engines[thread_idx]->gen_normal());
+      solutions[i].push_back(x);
+    }
   }
 
-  return 0;
+  return solutions;
 }
 
 

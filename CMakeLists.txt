@@ -20,10 +20,6 @@ set_property(TARGET ${PROJECT_NAME_STR} PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(${PROJECT_NAME_STR} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME_STR} dcmt)
 
-if (${OPENMP_FOUND})
-  set_target_properties(${PROJECT_NAME_STR} PROPERTIES COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
-  target_link_libraries(${PROJECT_NAME_STR} ${OpenMP_CXX_LIBRARIES})
-endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_options(${PROJECT_NAME_STR} INTERFACE -Wall -march=native)
@@ -33,3 +29,8 @@ endif()
 
 add_executable(sde_sample ${CMAKE_CURRENT_SOURCE_DIR}/sample_src/main.cpp)
 target_link_libraries(sde_sample ${PROJECT_NAME_STR})
+
+if (${OPENMP_FOUND})
+  set_target_properties(sde_sample PROPERTIES COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
+  target_link_libraries(sde_sample ${OpenMP_CXX_LIBRARIES})
+endif()

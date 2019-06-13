@@ -8,9 +8,9 @@
 template <typename T>
 std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n_impls,
                             double step, size_t n_steps, double x0, double d,
-                            std::function<double(double)> f)
+                            std::function<double(double)> f, size_t seed = 123)
 {
-  auto random_engines = MT2203Factory(n_threads, 123);
+  auto random_engines = MT2203Factory(n_threads, seed);
   std::vector<std::vector<double>> solutions;
   solutions.resize(n_impls);
 
@@ -19,7 +19,7 @@ std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n
   {
     int thread_idx = omp_get_thread_num();
     double x = x0;
-    solutions[i].resize(n_steps);
+    solutions[i].reserve(n_steps);
     for (size_t j = 0; j < n_steps; j++)
     {
       x = T()(f, d, step, x, random_engines[thread_idx]->gen_normal());

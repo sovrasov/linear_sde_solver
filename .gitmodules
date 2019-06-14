@@ -1,0 +1,3 @@
+[submodule "3rd-party/cmdline"]
+	path = 3rd-party/cmdline
+	url = https://github.com/sovrasov/cmdline.git

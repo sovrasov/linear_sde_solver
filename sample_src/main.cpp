@@ -5,9 +5,38 @@
 
 #include <cmdline.h>
 #include <json.hpp>
+#include <exprtk.hpp>
 #include <linear_sde_integrator.hpp>
 
 void initParser(cmdline::parser& parser);
+
+template <typename T>
+class MathFunction
+{
+private:
+  typedef exprtk::symbol_table<T> symbol_table_t;
+  typedef exprtk::expression<T>     expression_t;
+  typedef exprtk::parser<T>             parser_t;
+  T arg;
+  expression_t expression;
+
+public:
+  MathFunction(const std::string& expression_string)
+  {
+    symbol_table_t symbol_table;
+    symbol_table.add_variable("x", arg);
+    symbol_table.add_constants();
+    expression.register_symbol_table(symbol_table);
+    parser_t parser;
+    parser.compile(expression_string, expression);
+  }
+
+  T operator()(T x)
+  {
+    arg = x;
+    return expression.value();
+  }
+};
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +55,7 @@ int main(int argc, char *argv[])
                                parser.get<unsigned>("n_steps"),
                                parser.get<double>("x_0"),
                                parser.get<double>("d"),
-                               [](double x){return cos(x);},
+                               MathFunction<double>("cos(x)"),
                                parser.get<unsigned>("seed")
                                );
 

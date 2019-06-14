@@ -29,7 +29,8 @@ endif()
 
 add_executable(sde_sample ${CMAKE_CURRENT_SOURCE_DIR}/sample_src/main.cpp)
 target_include_directories(sde_sample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/json
-                                              ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/cmdline)
+                                              ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/cmdline
+                                              ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/exprtk)
 target_link_libraries(sde_sample ${PROJECT_NAME_STR})
 
 if (${OPENMP_FOUND})

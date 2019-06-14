@@ -17,24 +17,30 @@ private:
   typedef exprtk::symbol_table<T> symbol_table_t;
   typedef exprtk::expression<T>     expression_t;
   typedef exprtk::parser<T>             parser_t;
-  T arg;
-  expression_t expression;
+  std::vector<T> args;
+  std::vector<expression_t> expressions;
 
 public:
-  MathFunction(const std::string& expression_string)
+  MathFunction(const std::string& expression_string, size_t num_threads = 1)
   {
-    symbol_table_t symbol_table;
-    symbol_table.add_variable("x", arg);
-    symbol_table.add_constants();
-    expression.register_symbol_table(symbol_table);
-    parser_t parser;
-    parser.compile(expression_string, expression);
+    args.resize(num_threads);
+    expressions.resize(num_threads);
+    for (size_t i = 0; i < num_threads; i++)
+    {
+        symbol_table_t symbol_table;
+        symbol_table.add_variable("x", args[i]);
+        symbol_table.add_constants();
+        expressions[i].register_symbol_table(symbol_table);
+        parser_t parser;
+        parser.compile(expression_string, expressions[i]);
+    }
   }
 
   T operator()(T x)
   {
-    arg = x;
-    return expression.value();
+    int thread_idx = omp_get_thread_num();
+    args[thread_idx] = x;
+    return expressions[thread_idx].value();
   }
 };
 

@@ -16,7 +16,7 @@ target_include_directories(${PROJECT_NAME_STR} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR
 target_include_directories(${PROJECT_NAME_STR} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU")
-  target_compile_options(${PROJECT_NAME_STR} PRIVATE -std=c99 -pedantic -Werror -Wall)
+  target_compile_options(${PROJECT_NAME_STR} PRIVATE -std=c99 -pedantic -Werror -Wall -march=native)
 elseif (CMAKE_C_COMPILER_ID MATCHES "MSVC")
   add_definitions(/EHsc)
 endif()

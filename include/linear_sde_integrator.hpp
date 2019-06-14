@@ -3,11 +3,13 @@
 #include <functional>
 #include <cmath>
 #include <omp.h>
+#include <chrono>
 
 #include "mt_random.hpp"
 
 template <typename T>
-std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n_impls,
+std::pair<std::vector<std::vector<double>>, double>
+                            integrate_linear_sde(size_t n_threads, size_t n_impls,
                             double step, size_t n_steps, double x0, double d,
                             std::function<double(double)> f, size_t seed = 123)
 {
@@ -16,6 +18,7 @@ std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n
   solutions.resize(n_impls);
   auto solver_rule = T(d, step);
 
+  auto start = std::chrono::system_clock::now();
 #pragma omp parallel for num_threads(n_threads) schedule(static)
   for (size_t i = 0; i < n_impls; i++)
   {
@@ -28,8 +31,10 @@ std::vector<std::vector<double>> integrate_linear_sde(size_t n_threads, size_t n
       solutions[i].push_back(x);
     }
   }
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end - start;
 
-  return solutions;
+  return std::make_pair(solutions, elapsed_seconds.count());
 }
 
 class Scheme

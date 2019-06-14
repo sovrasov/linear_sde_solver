@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <chrono>
 #include <cmath>
 
 #include <cmdline.h>
@@ -15,24 +14,24 @@ int main(int argc, char *argv[])
   initParser(parser);
   parser.parse_check(argc, argv);
 
-  auto start = std::chrono::system_clock::now();
+  double a = parser.get<double>("a");
   auto integrate_f = integrate_linear_sde<HeunScheme>;
   if (parser.get<std::string>("method") == "euler")
     integrate_f = integrate_linear_sde<EulerScheme>;
 
-  auto solutions = integrate_f(parser.get<unsigned>("numThreads"),
-                               parser.get<unsigned>("n_impls"),
-                               parser.get<double>("step"),
-                               parser.get<unsigned>("n_steps"),
-                               parser.get<double>("x_0"),
-                               parser.get<double>("d"),
-                               [](double x){return cos(x);},
-                               parser.get<unsigned>("seed")
-                               );
+  std::vector<std::vector<double>> solutions;
+  double time;
+  std::tie(solutions, time) = integrate_f(parser.get<unsigned>("numThreads"),
+                                          parser.get<unsigned>("n_impls"),
+                                          parser.get<double>("step"),
+                                          parser.get<unsigned>("n_steps"),
+                                          parser.get<double>("x_0"),
+                                          parser.get<double>("d"),
+                                          [a](double x){return a - sin(x);},
+                                          parser.get<unsigned>("seed")
+                                          );
 
-  auto end = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end - start;
-  std::cout << "Time elapsed: " << elapsed_seconds.count() << "s\n";
+  std::cout << "Time elapsed: " << time << "s\n";
 
   auto fileName = parser.get<std::string>("outFile");
   if (!fileName.empty())
@@ -46,7 +45,7 @@ int main(int argc, char *argv[])
     }
     nlohmann::json j;
     j["num_threads"] = parser.get<unsigned>("numThreads");
-    j["time_elapsed"] = elapsed_seconds.count();
+    j["time_elapsed"] = time;
     j["t_0"] = 0;
     j["step"] = parser.get<double>("step");
     j["n_steps"] = parser.get<unsigned>("n_steps");
@@ -64,6 +63,7 @@ void initParser(cmdline::parser& parser)
   parser.add<unsigned>("n_steps", 'n', "number of integration steps", false, 1000);
   parser.add<double>("x_0", 0, "initial value of x", false, 0);
   parser.add<double>("d", 'd', "", false, 1);
+  parser.add<double>("a", 'a', "", false, 0.5);
   parser.add<unsigned>("seed", 0, "seed for random engines", false, 123);
   parser.add<unsigned>("numThreads", 'p', "number of OMP threads", false, 1);
   parser.add<std::string>("method", 'm', "Name of the used integration scheme", false,

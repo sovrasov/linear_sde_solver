@@ -5,7 +5,7 @@
 
 MTRandom::MTRandom(int idx, size_t seed_group, size_t seed)
 {
-  static_assert(sizeof(unsigned) == 32 / 8);
+  static_assert(sizeof(unsigned) == 32 / 8, "");
   mGenerator = get_mt_parameter_id_st(32, 521, idx, seed_group);
   sgenrand_mt(seed, mGenerator);
 }

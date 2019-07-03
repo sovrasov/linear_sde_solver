@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -36,6 +37,16 @@ int main(int argc, char *argv[])
   auto fileName = parser.get<std::string>("outFile");
   if (!fileName.empty())
   {
+    std::vector<double> hole_probs(solutions[0].size(), 0.);
+    double hole_lb = parser.get<double>("hole_lb");
+    double hole_ub = parser.get<double>("hole_ub");
+    for(size_t i = 0; i < solutions.size(); i++)
+      for(size_t j = 0; j < solutions[i].size(); j++)
+        if (solutions[i][j] >= hole_lb && solutions[i][j] <= hole_ub)
+          hole_probs[j] += 1.;
+    for(auto& prob : hole_probs)
+      prob /= solutions.size();
+
     std::ofstream fout;
     fout.open(fileName, std::ios_base::out);
     if (!fout.is_open())
@@ -50,6 +61,7 @@ int main(int argc, char *argv[])
     j["step"] = parser.get<double>("step");
     j["n_steps"] = parser.get<unsigned>("n_steps");
     j["solutions"] = solutions;
+    j["hole_probs"] = hole_probs;
     fout << j;
   }
 
@@ -62,8 +74,10 @@ void initParser(cmdline::parser& parser)
   parser.add<unsigned>("n_impls", 'i', "number of simulated implementations", false, 1000);
   parser.add<unsigned>("n_steps", 'n', "number of integration steps", false, 1000);
   parser.add<double>("x_0", 0, "initial value of x", false, 0);
-  parser.add<double>("d", 'd', "", false, 1);
-  parser.add<double>("a", 'a', "", false, 0.5);
+  parser.add<double>("d", 'd', "Diffusion coefficient", false, 1);
+  parser.add<double>("a", 'a', "Parameter of the equation", false, 0.5);
+  parser.add<double>("hole_lb", 'l', "", false, -M_PI);
+  parser.add<double>("hole_ub", 'u', "", false, M_PI);
   parser.add<unsigned>("seed", 0, "seed for random engines", false, 123);
   parser.add<unsigned>("numThreads", 'p', "number of OMP threads", false, 1);
   parser.add<std::string>("method", 'm', "Name of the used integration scheme", false,

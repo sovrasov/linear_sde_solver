@@ -26,11 +26,19 @@ def main(args):
                 for i in range(n_impls):
                     pl.plot(timestamps, x_data[i], label='impl #{}'.format(i))
 
-            pl.xlabel('t')
-            pl.ylabel('X(t)')
+            pl.xlabel('$t$')
+            pl.ylabel('$X(t)$')
             pl.legend(loc='best')
+            pl.show()
+            pl.clf()
 
-    pl.show()
+            pl.xlabel('$t$')
+            pl.ylabel('$p$')
+            pl.plot(timestamps, data['hole_probs'], label='Probability of hole')
+            pl.legend(loc='best')
+            pl.show()
+            pl.clf()
+
 
 
 if __name__ == '__main__':

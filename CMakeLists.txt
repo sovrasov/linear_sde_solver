@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-add_subdirectory(3rd-party/dcmt0.6.2)
+add_subdirectory(3rd-party/random_engine)
 
 set(PROJECT_NAME_STR linear_sde_integrator)
 project(${PROJECT_NAME_STR})

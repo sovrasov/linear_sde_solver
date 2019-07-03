@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <limits>
+#include <algorithm>
 #include <cmath>
 #include "mt_random.hpp"
 

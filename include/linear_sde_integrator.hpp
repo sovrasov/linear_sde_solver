@@ -20,7 +20,7 @@ std::pair<std::vector<std::vector<double>>, double>
 
   auto start = std::chrono::system_clock::now();
 #pragma omp parallel for num_threads(n_threads) schedule(static)
-  for (size_t i = 0; i < n_impls; i++)
+  for (int i = 0; i < static_cast<int>(n_impls); i++)
   {
     int thread_idx = omp_get_thread_num();
     double x = x0;
